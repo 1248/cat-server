@@ -1,0 +1,109 @@
+<html>
+<head>
+    <title>Dynamic Catalogue Server</title>
+</head>
+<body>
+    <h1>Dynamic Catalogue Server</h1>
+    <p>
+    This page is being served by dynserver, a dynamic catalogue server for the UK TSB IoT Demonstrator project.
+    </p>
+    <h2>Read</h2>
+    <p>
+    This server provides a single catalogue on <a href="/cat">/cat</a>. The catalogue is a list of resources items, each with a URI and a set of metadata. The metadata itself is a list of URIs and values, which describe the catalogue item.
+    </p>
+
+    <h2>Search</h2>
+    <p>
+    The catalogue may be filtered to show just items matching href, rel or val by using query parameters. One, two or three parameters may be given.
+    <ul>
+        <li><a href="/cat?href=http://www.example.org/thing1">/cat?href=http://www.example.org/thing1</a> will show only the item with the given href, or no items</li>
+        <li><a href="/cat?rel=http://xmlns.com/foaf/0.1/knows">/cat?rel=http://xmlns.com/foaf/0.1/knows</a> will show only items which have a rel attribute of http://xmlns.com/foaf/0.1/knows, or no items</li>
+        <li><a href="/cat?val=urn:isbn:9780394800011">/cat?val=urn:isbn:9780394800011</a> will show only items which have a val attribute of urn:isbn:9780394800011, or no items</li>
+    </ul>
+    </p>
+
+    <h2>Insert</h2>
+    <p>
+    An item may be inserted into the catalogue using HTTP POST. The data submitted is an object to go into the items array. Submitted data must have content type "application/json". With this server, POST must be accompanied by Basic Auth credentials of username:"MAGICKEY", password:"". For example:
+    <pre>
+curl -v http://localhost:8001/cat --user MAGICKEY: -XPOST \
+    --header "Content-Type: application/json" \
+    --data '{"href":"http://www.example.org/mytest", "metadata":[{"rel":"urn:X-tsbiot:hasDescription:en","val":"My test"}]}'
+    </pre>
+    </p>
+
+    <h2>Modify</h2>
+    <p>
+    An existing catalogue item may be modified using HTTP PUT. The data submitted is an object to go into the items array. A query parameter of href must be given to identify the item to modify. Submitted data must have content type "application/json". With this server, PUT must be accompanied by Basic Auth credentials of username:"MAGICKEY", password:"". For example:
+    <pre>
+curl -v http://localhost:8001/cat?href=http://www.example.org/mytest \
+    --user MAGICKEY: -XPUT \
+    --header "Content-Type: application/json" \
+    --data '{"href":"http://www.example.org/mytest", "metadata":[{"rel":"urn:X-tsbiot:hasDescription:en","val":"Updated description"}]}'
+    </pre>
+    </p>
+
+    <h2>Delete</h2>
+    <p>
+    An existing catalogue item may be removed using HTTP DELETE. With this server, DELETE must be accompanied by Basic Auth credentials of username:"MAGICKEY", password:"". For example:
+    <pre>
+curl -v http://localhost:8001/cat?href=http://www.example.org/mytest \
+    --user MAGICKEY: -XDELETE
+    </pre>
+    </p>
+
+
+    <h2>Example</h2>
+    <p>
+    The following catalogue shows a catalogue containing two items, "thing1" and "thing2". The items are identified by unique URIs. The metadata "rel" and "val" pairs make statements about the items.
+    </p>
+    <p>
+    <pre>
+{
+    "metadata":[
+        {
+            "rel":"urn:X-tsbiot:rels:isContentType",
+            "val":"application/vnd.tsbiot.catalogue+json"
+        },
+        {
+            "rel":"urn:X-tsbiot:rels:hasDescription:en",
+            "val":"my home"
+        }
+    ],
+    "items":[
+        {
+            "href":"http://www.example.org/thing1",
+            "metadata":[
+                {
+                    "rel":"urn:X-tsbiot:rels:hasDescription:en",
+                    "val":"Thing 1"
+                },
+                {
+                    "rel":"http://www.example.org/ontologies/fiction#character",
+                    "val":"urn:isbn:9780394800011"
+                },
+                {
+                    "rel":"http://xmlns.com/foaf/0.1/knows",
+                    "val":"http://www.example.org/thing2"
+                }
+            ]
+        },
+        {
+            "href":"http://www.example.org/thing2",
+            "metadata":[
+                {
+                    "rel":"urn:X-tsbiot:rels:hasDescription:en",
+                    "val":"Thing 2"
+                },
+                {
+                    "rel":"http://xmlns.com/foaf/0.1/knows",
+                    "val":"http://www.example.org/thing1"
+                }
+            ]
+        }
+    ]
+}
+    </pre>
+    </p>
+</body>
+</html>
